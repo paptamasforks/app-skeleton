@@ -44,7 +44,7 @@ class Controller_OAuth extends Controller_Template_Main {
         // If user is already logged in, redirect
         if (User::instance()->logged_in())
         {
-            $this->request->redirect(URL::map('auth.after_login'));
+            $this->redirect(URL::map('auth.after_login'));
         }
 
         // User is not logged in, check for facebook/google id
@@ -60,7 +60,7 @@ class Controller_OAuth extends Controller_Template_Main {
             catch (Exception $e)
             {
                 // Something went wrong, maybe the access token expired
-                $this->request->redirect($oauth_instance->login_url());
+                $this->redirect($oauth_instance->login_url());
             }
 
             $oauth = OAuth_Manager::instance();
@@ -118,7 +118,7 @@ class Controller_OAuth extends Controller_Template_Main {
         else
         {
             // Get access permission from the user
-            $this->request->redirect($oauth_instance->login_url());
+            $this->redirect($oauth_instance->login_url());
         }
     }
 
@@ -138,7 +138,7 @@ class Controller_OAuth extends Controller_Template_Main {
             $user->login($identity, TRUE);
             $user->authenticated_with($provider);
 
-            $this->request->redirect(URL::map('auth.after_login'));
+            $this->redirect(URL::map('auth.after_login'));
         }
     }
 }

@@ -96,7 +96,7 @@ Cookie::$salt = md5('secret');
  */
 Kohana::init(array(
 	'base_url'      => dirname($_SERVER['SCRIPT_NAME']),
-    'index_file'    => false,
+    'index_file'    => FALSE
 ));
 
 /**

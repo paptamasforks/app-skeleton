@@ -6,49 +6,82 @@
  * @website		https://bitbucket.org/paptamas/app-skeleton
  *
  */
-
 class Kohana_Exception extends Kohana_Kohana_Exception {
 
-    public static function handler(Exception $e)
+    /**
+     * @var array Default error titles and messages
+     */
+    public static $default = array(
+        404 => array(
+            'title' => '404 Not Found',
+            'message' => 'Server can not find the requested page.'
+        ),
+
+        403 => array(
+            'title' => '403 Forbidden',
+            'message' => 'You do not have permission to access this page.'
+        ),
+
+        503 => array(
+            'title' => '503 service unavailable',
+            'message' => 'We are maintaining our servers. We will back very soon.'
+        ),
+
+        500 => array(
+            'title' => 'Internal server error',
+            'message' => 'Something went wrong. Please try again later.'
+        )
+    );
+
+    public static function response(Exception $e)
     {
         if (Kohana::$environment === Kohana::DEVELOPMENT)
         {
-            parent::handler($e);
+            return parent::response($e);
         }
         else
         {
             try
             {
-                Kohana::$log->add(Log::ERROR, parent::text($e));
+                $code = ($e instanceof HTTP_Exception) ? $e->getCode() : 500;
 
-                $params = array
-                (
-                    'action'  => 500,
-                    'message' => rawurlencode($e->getMessage())
-                );
+                // Prepare the response object.
+                $response = Response::factory();
 
-                if ($e instanceof HTTP_Exception)
+                // Set the response status
+                $response->status($code);
+
+                // Set the response headers
+                $response->headers('Content-Type', Kohana_Exception::$error_view_content_type.'; charset='.Kohana::$charset);
+
+                // Set the response body
+                if (Request::initial()->is_ajax())
                 {
-                    $params['action'] = $e->getCode();
+                    $response->body(Kohana_Exception::$default[$code]['message']);
                 }
+                else
+                {
+                    // Render error page
+                    $view = View::factory('errors/'.$code)
+                        ->set('title', Kohana_Exception::$default[$code]['title'])
+                        ->set('message', Kohana_Exception::$default[$code]['message']);
 
-                // Error sub-request.
-                echo Request::factory(Route::get('error')->uri($params))
-                    ->execute()
-                    ->send_headers()
-                    ->body();
+                    $response->body($view->render());
+                }
             }
             catch (Exception $e)
             {
-                // Clean the output buffer if one exists
-                ob_get_level() and ob_clean();
-
-                // Display the exception text
-                echo parent::text($e);
-
-                // Exit with an error status
-                exit(1);
+                /**
+                 * Things are going badly for us, Lets try to keep things under control by
+                 * generating a simpler response object.
+                 */
+                $response = Response::factory();
+                $response->status(500);
+                $response->headers('Content-Type', 'text/plain');
+                $response->body(Kohana_Exception::text($e));
             }
+
+            return $response;
         }
     }
 }

@@ -26,7 +26,7 @@ class Controller_Auth extends Controller_Template_Main {
         // Redirect the user if already signed in
         if (User::instance()->logged_in())
         {
-            $this->request->redirect(URL::map('auth.after_login'));
+            $this->redirect(URL::map('auth.after_login'));
         }
 
         // Display login page
@@ -45,7 +45,7 @@ class Controller_Auth extends Controller_Template_Main {
         if ( ! $user->logged_in())
         {
             $next = URL::map('auth.login').'?next='.URL::map('auth.edit');
-            $this->request->redirect($next);
+            $this->redirect($next);
         }
 
         $fields = array('full_name', 'username', 'email');
@@ -65,7 +65,7 @@ class Controller_Auth extends Controller_Template_Main {
         // If user is already logged in, redirect him to base url
         if (User::instance()->logged_in())
         {
-            $this->request->redirect(URL::map('auth.after_login'));
+            $this->redirect(URL::map('auth.after_login'));
         }
 
         // Try to login with cookie
@@ -91,7 +91,7 @@ class Controller_Auth extends Controller_Template_Main {
             User::instance()->login($identity);
 
             // Redirect user to home
-            $this->request->redirect(URL::map('auth.after_login'));
+            $this->redirect(URL::map('auth.after_login'));
         }
     }
 
@@ -116,7 +116,7 @@ class Controller_Auth extends Controller_Template_Main {
         }
 
         // Redirect to login page
-        $this->request->redirect(URL::map('auth.after_logout'));
+        $this->redirect(URL::map('auth.after_logout'));
     }
 
     /**
@@ -157,14 +157,14 @@ class Controller_Auth extends Controller_Template_Main {
         catch (Auth_Recovery_Link_Exception $e)
         {
             // Invalid or expired secure key
-            $this->request->redirect(URL::map('auth.reset_expired'));
+            $this->redirect(URL::map('auth.reset_expired'));
         }
     }
 
     /**
      * Display message to user
      *
-     * @throws HTTP_Exception_404
+     * @throws HTTP_Exception
      * @return void
      */
     public function action_message()
@@ -174,7 +174,7 @@ class Controller_Auth extends Controller_Template_Main {
 
         if ( ! in_array($view_id, $valid))
         {
-            throw new HTTP_Exception_404();
+            throw HTTP_Exception::factory(404);
         }
 
         $this->template
@@ -189,6 +189,6 @@ class Controller_Auth extends Controller_Template_Main {
      */
     public function action_index()
     {
-        $this->request->redirect(URL::map('auth.login'));
+        $this->redirect(URL::map('auth.login'));
     }
 }

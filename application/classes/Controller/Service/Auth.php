@@ -156,7 +156,7 @@ class Controller_Service_Auth extends Controller_Service {
             else
             {
                 // This is not an ajax request
-                $this->request->redirect($next);
+                $this->redirect($next);
             }
         }
         else
@@ -185,7 +185,7 @@ class Controller_Service_Auth extends Controller_Service {
                 $session->set('auth.form.data', Arr::get($this->request->post(), 'login'));
 
                 // Go back to login page
-                $this->request->redirect(URL::map('auth.login'));
+                $this->redirect(URL::map('auth.login'));
             }
         }
     }
